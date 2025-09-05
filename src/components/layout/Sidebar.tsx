@@ -6,10 +6,8 @@ import {
   Target, 
   Archive, 
   Settings,
-  Menu,
   X
 } from 'lucide-react';
-import { useState } from 'react';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -20,8 +18,12 @@ const navigation = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(true);
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
@@ -29,7 +31,7 @@ export default function Sidebar() {
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden"
-          onClick={() => setIsOpen(false)}
+          onClick={onClose}
         />
       )}
 
@@ -42,14 +44,14 @@ export default function Sidebar() {
         w-72 flex flex-col
       `}>
         {/* Header */}
-        <div className="p-6 border-b border-card-border">
+        <div className="p-4 md:p-6 border-b border-card-border">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold tracking-tight">Planner</h1>
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight">Planner</h1>
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={onClose}
               className="md:hidden p-2 hover:bg-secondary-hover rounded-lg transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -66,30 +68,22 @@ export default function Sidebar() {
                 className={({ isActive }) =>
                   `nav-item ${isActive ? 'nav-item-active' : ''}`
                 }
-                onClick={() => setIsOpen(false)}
+                onClick={onClose}
               >
-                <Icon className="w-5 h-5" />
-                <span>{item.name}</span>
+                <Icon className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="text-sm md:text-base">{item.name}</span>
               </NavLink>
             );
           })}
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-card-border">
+        <div className="p-3 md:p-4 border-t border-card-border">
           <div className="text-xs text-muted-foreground text-center">
             v1.0.0 • Clean & Modern
           </div>
         </div>
       </div>
-
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed top-4 left-4 z-50 p-3 bg-card rounded-lg shadow-[var(--shadow-soft)] md:hidden"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
     </>
   );
 }

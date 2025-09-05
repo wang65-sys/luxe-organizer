@@ -153,15 +153,15 @@
   
   /* Quick Add Button */
   .quick-add-btn {
-    @apply fixed bottom-8 right-8 w-14 h-14 bg-primary text-primary-foreground
-           rounded-full shadow-[var(--shadow-elevated)] hover:shadow-xl
-           transition-[var(--transition-bounce)] hover:scale-110 z-50
+    @apply fixed bottom-6 right-4 md:bottom-8 md:right-8 w-12 h-12 md:w-14 md:h-14 
+           bg-primary text-primary-foreground rounded-full shadow-[var(--shadow-elevated)] 
+           hover:shadow-xl transition-[var(--transition-bounce)] hover:scale-110 z-50
            flex items-center justify-center;
   }
   
   /* Navigation */
   .nav-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-lg font-medium
+    @apply flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg font-medium
            transition-[var(--transition-smooth)] text-muted-foreground
            hover:text-foreground hover:bg-secondary-hover;
   }
