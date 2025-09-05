@@ -1,4 +1,5 @@
 import { ReactNode, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import QuickAddButton from '../ui/quick-add-button';
@@ -9,6 +10,8 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const isDashboard = location.pathname === '/';
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -24,7 +27,7 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </main>
 
-      <QuickAddButton />
+      {isDashboard && <QuickAddButton />}
     </div>
   );
 }

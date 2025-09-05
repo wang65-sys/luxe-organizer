@@ -3,9 +3,13 @@ import { Plus, Search, Target, Trophy, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import GoalFormModal from '@/components/ui/goal-form-modal';
+import LoadingScreen from '@/components/ui/loading-screen';
 
 export default function Goals() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Mock data
   const goals = [
@@ -53,6 +57,19 @@ export default function Goals() {
     return acc + calculateProgress(goal.sections);
   }, 0) / goals.length;
 
+  const handleAddGoal = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsFormOpen(true);
+    }, 500);
+  };
+
+  const handleGoalSubmit = (goal: any) => {
+    console.log('Created goal:', goal);
+    setIsFormOpen(false);
+  };
+
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
@@ -61,7 +78,7 @@ export default function Goals() {
           <h1 className="text-3xl font-bold tracking-tight">Goals</h1>
           <p className="text-muted-foreground">Track your long-term objectives and milestones</p>
         </div>
-        <Button className="btn-planner">
+        <Button className="btn-planner" onClick={handleAddGoal}>
           <Plus className="w-4 h-4 mr-2" />
           Add Goal
         </Button>
@@ -130,7 +147,7 @@ export default function Goals() {
             <p className="text-muted-foreground mb-4">
               {searchTerm ? 'Try adjusting your search terms' : 'Create your first goal to get started'}
             </p>
-            <Button>
+            <Button onClick={handleAddGoal}>
               <Plus className="w-4 h-4 mr-2" />
               Add Goal
             </Button>
@@ -214,6 +231,14 @@ export default function Goals() {
           ))
         )}
       </div>
+
+      {isLoading && <LoadingScreen message="Loading goal form..." />}
+      
+      <GoalFormModal 
+        isOpen={isFormOpen} 
+        onClose={() => setIsFormOpen(false)} 
+        onSubmit={handleGoalSubmit}
+      />
     </div>
   );
 }

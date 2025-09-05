@@ -1,7 +1,10 @@
 import { CheckSquare, Calendar, Target, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  
   // Mock data for demonstration
   const recentTasks = [
     { id: '1', title: 'Complete project proposal', dueDate: '2024-01-15', priority: 'high' },
@@ -70,7 +73,12 @@ export default function Dashboard() {
         <div className="planner-card">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold">Recent Tasks</h2>
-            <Button variant="ghost" size="sm" className="text-primary">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-primary"
+              onClick={() => navigate('/tasks')}
+            >
               <Plus className="w-4 h-4 mr-1" />
               Add Task
             </Button>
@@ -109,7 +117,12 @@ export default function Dashboard() {
         <div className="planner-card">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold">Upcoming Events</h2>
-            <Button variant="ghost" size="sm" className="text-primary">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-primary"
+              onClick={() => navigate('/events')}
+            >
               <Plus className="w-4 h-4 mr-1" />
               Add Event
             </Button>
@@ -139,7 +152,12 @@ export default function Dashboard() {
       <div className="planner-card">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Active Goals</h2>
-          <Button variant="ghost" size="sm" className="text-primary">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-primary"
+            onClick={() => navigate('/goals')}
+          >
             <Plus className="w-4 h-4 mr-1" />
             Add Goal
           </Button>

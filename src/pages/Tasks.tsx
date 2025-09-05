@@ -3,10 +3,14 @@ import { Plus, Search, Filter, CheckSquare2, Clock, AlertCircle } from 'lucide-r
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import TaskFormModal from '@/components/ui/task-form-modal';
+import LoadingScreen from '@/components/ui/loading-screen';
 
 export default function Tasks() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Mock data
   const tasks = [
@@ -61,6 +65,19 @@ export default function Tasks() {
     return new Date(dueDate) < new Date() && !tasks.find(t => t.dueDate === dueDate)?.completed;
   };
 
+  const handleAddTask = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsFormOpen(true);
+    }, 500);
+  };
+
+  const handleTaskSubmit = (task: any) => {
+    console.log('Created task:', task);
+    setIsFormOpen(false);
+  };
+
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
@@ -69,7 +86,7 @@ export default function Tasks() {
           <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
           <p className="text-muted-foreground">Manage and track your tasks</p>
         </div>
-        <Button className="btn-planner">
+        <Button className="btn-planner" onClick={handleAddTask}>
           <Plus className="w-4 h-4 mr-2" />
           Add Task
         </Button>
@@ -111,7 +128,7 @@ export default function Tasks() {
             <p className="text-muted-foreground mb-4">
               {searchTerm ? 'Try adjusting your search terms' : 'Create your first task to get started'}
             </p>
-            <Button>
+            <Button onClick={handleAddTask}>
               <Plus className="w-4 h-4 mr-2" />
               Add Task
             </Button>
@@ -171,6 +188,14 @@ export default function Tasks() {
           ))
         )}
       </div>
+
+      {isLoading && <LoadingScreen message="Loading task form..." />}
+      
+      <TaskFormModal 
+        isOpen={isFormOpen} 
+        onClose={() => setIsFormOpen(false)} 
+        onSubmit={handleTaskSubmit}
+      />
     </div>
   );
 }

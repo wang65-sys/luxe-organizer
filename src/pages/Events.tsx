@@ -3,10 +3,15 @@ import { Plus, Search, Calendar as CalendarIcon, Clock, MapPin } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
+import EventFormModal from '@/components/ui/event-form-modal';
+import LoadingScreen from '@/components/ui/loading-screen';
 
 export default function Events() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [preselectedDate, setPreselectedDate] = useState<Date | undefined>();
 
   // Mock data
   const events = [
@@ -52,6 +57,21 @@ export default function Events() {
     return events.filter(event => event.date === dateString);
   };
 
+  const handleAddEvent = (date?: Date) => {
+    setPreselectedDate(date);
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsFormOpen(true);
+    }, 500);
+  };
+
+  const handleEventSubmit = (event: any) => {
+    console.log('Created event:', event);
+    setIsFormOpen(false);
+    setPreselectedDate(undefined);
+  };
+
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
@@ -60,7 +80,7 @@ export default function Events() {
           <h1 className="text-3xl font-bold tracking-tight">Events</h1>
           <p className="text-muted-foreground">Manage your schedule and appointments</p>
         </div>
-        <Button className="btn-planner">
+        <Button className="btn-planner" onClick={() => handleAddEvent()}>
           <Plus className="w-4 h-4 mr-2" />
           Add Event
         </Button>
@@ -94,19 +114,30 @@ export default function Events() {
                 <h3 className="font-medium mb-3">
                   Events on {selectedDate.toLocaleDateString()}
                 </h3>
-                <div className="space-y-2">
-                  {getEventsForDate(selectedDate).map(event => (
-                    <div key={event.id} className="p-2 bg-secondary rounded-lg">
-                      <div className="font-medium text-sm">{event.title}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {event.startTime} - {event.endTime}
-                      </div>
-                    </div>
-                  ))}
-                  {getEventsForDate(selectedDate).length === 0 && (
-                    <p className="text-sm text-muted-foreground">No events scheduled</p>
-                  )}
-                </div>
+                 <div className="space-y-2">
+                   {getEventsForDate(selectedDate).map(event => (
+                     <div key={event.id} className="p-2 bg-secondary rounded-lg">
+                       <div className="font-medium text-sm">{event.title}</div>
+                       <div className="text-xs text-muted-foreground">
+                         {event.startTime} - {event.endTime}
+                       </div>
+                     </div>
+                   ))}
+                   {getEventsForDate(selectedDate).length === 0 && (
+                     <div className="space-y-2">
+                       <p className="text-sm text-muted-foreground">No events scheduled</p>
+                       <Button 
+                         size="sm" 
+                         variant="outline" 
+                         onClick={() => handleAddEvent(selectedDate)}
+                         className="w-full"
+                       >
+                         <Plus className="w-3 h-3 mr-1" />
+                         Add Event
+                       </Button>
+                     </div>
+                   )}
+                 </div>
               </div>
             )}
           </div>
@@ -134,7 +165,7 @@ export default function Events() {
                 <p className="text-muted-foreground mb-4">
                   {searchTerm ? 'Try adjusting your search terms' : 'Create your first event to get started'}
                 </p>
-                <Button>
+                <Button onClick={() => handleAddEvent()}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Event
                 </Button>
@@ -194,6 +225,15 @@ export default function Events() {
           </div>
         </div>
       </div>
+
+      {isLoading && <LoadingScreen message="Loading event form..." />}
+      
+      <EventFormModal 
+        isOpen={isFormOpen} 
+        onClose={() => setIsFormOpen(false)} 
+        onSubmit={handleEventSubmit}
+        preselectedDate={preselectedDate}
+      />
     </div>
   );
 }
