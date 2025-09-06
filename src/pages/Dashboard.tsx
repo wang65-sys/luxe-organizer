@@ -1,16 +1,20 @@
 import { CheckSquare, Calendar, Target, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import LoadingScreen from '@/components/ui/loading-screen';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   
   // Mock data for demonstration
-  const recentTasks = [
-    { id: '1', title: 'Complete project proposal', dueDate: '2024-01-15', priority: 'high' },
-    { id: '2', title: 'Review team feedback', dueDate: '2024-01-16', priority: 'medium' },
-    { id: '3', title: 'Update documentation', dueDate: '2024-01-17', priority: 'low' },
-  ];
+  const [recentTasks, setRecentTasks] = useState([
+    { id: '1', title: 'Complete project proposal', dueDate: '2024-01-15', priority: 'high', completed: false },
+    { id: '2', title: 'Review team feedback', dueDate: '2024-01-16', priority: 'medium', completed: false },
+    { id: '3', title: 'Update documentation', dueDate: '2024-01-17', priority: 'low', completed: true },
+  ]);
 
   const upcomingEvents = [
     { id: '1', title: 'Team Meeting', date: '2024-01-15', time: '10:00 AM' },
@@ -21,6 +25,26 @@ export default function Dashboard() {
     { id: '1', title: 'Learn React Advanced Patterns', progress: 65 },
     { id: '2', title: 'Complete Fitness Challenge', progress: 40 },
   ];
+
+  const handleTaskToggle = (taskId: string) => {
+    setRecentTasks(tasks => 
+      tasks.map(task => 
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
+
+  const handleNavigation = (path: string) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      navigate(path);
+      setIsLoading(false);
+    }, 500);
+  };
+
+  if (isLoading) {
+    return <LoadingScreen message="Loading page..." />;
+  }
 
   return (
     <div className="space-y-8 fade-in">
@@ -77,7 +101,7 @@ export default function Dashboard() {
               variant="ghost" 
               size="sm" 
               className="text-primary"
-              onClick={() => navigate('/tasks')}
+              onClick={() => handleNavigation('/tasks')}
             >
               <Plus className="w-4 h-4 mr-1" />
               Add Task
@@ -90,12 +114,19 @@ export default function Dashboard() {
                 key={task.id} 
                 className="planner-card-compact cursor-pointer"
                 style={{ animationDelay: `${index * 0.1}s` }}
+                onClick={() => handleNavigation('/tasks')}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 border-2 border-silver rounded"></div>
+                    <Checkbox 
+                      checked={task.completed}
+                      onCheckedChange={() => handleTaskToggle(task.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
                     <div>
-                      <p className="font-medium">{task.title}</p>
+                      <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                        {task.title}
+                      </p>
                       <p className="text-sm text-muted-foreground">Due: {task.dueDate}</p>
                     </div>
                   </div>
@@ -121,7 +152,7 @@ export default function Dashboard() {
               variant="ghost" 
               size="sm" 
               className="text-primary"
-              onClick={() => navigate('/events')}
+              onClick={() => handleNavigation('/events')}
             >
               <Plus className="w-4 h-4 mr-1" />
               Add Event
@@ -134,6 +165,7 @@ export default function Dashboard() {
                 key={event.id} 
                 className="planner-card-compact cursor-pointer"
                 style={{ animationDelay: `${(index + 3) * 0.1}s` }}
+                onClick={() => handleNavigation('/events')}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-primary rounded-full"></div>
@@ -156,7 +188,7 @@ export default function Dashboard() {
             variant="ghost" 
             size="sm" 
             className="text-primary"
-            onClick={() => navigate('/goals')}
+            onClick={() => handleNavigation('/goals')}
           >
             <Plus className="w-4 h-4 mr-1" />
             Add Goal
@@ -169,6 +201,7 @@ export default function Dashboard() {
               key={goal.id} 
               className="planner-card-compact cursor-pointer"
               style={{ animationDelay: `${(index + 6) * 0.1}s` }}
+              onClick={() => handleNavigation('/goals')}
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
