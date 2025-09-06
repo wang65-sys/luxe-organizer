@@ -12,9 +12,8 @@ export default function Events() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [preselectedDate, setPreselectedDate] = useState<Date | undefined>();
-
-  // Mock data
-  const events = [
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [events, setEvents] = useState([
     {
       id: '1',
       title: 'Team Meeting',
@@ -44,8 +43,8 @@ export default function Events() {
       endTime: '10:00',
       location: 'Product Lab',
       completed: true
-    },
-  ];
+    }
+  ]);
 
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -67,9 +66,31 @@ export default function Events() {
   };
 
   const handleEventSubmit = (event: any) => {
-    console.log('Created event:', event);
+    if (editingEvent) {
+      setEvents(events.map(e => e.id === editingEvent.id ? { ...event, id: editingEvent.id } : e));
+      setEditingEvent(null);
+    } else {
+      setEvents([...events, { ...event, id: Date.now().toString() }]);
+    }
     setIsFormOpen(false);
     setPreselectedDate(undefined);
+  };
+
+  const handleToggleComplete = (eventId: string) => {
+    setEvents(events.map(event => 
+      event.id === eventId ? { ...event, completed: !event.completed } : event
+    ));
+  };
+
+  const handleEditEvent = (event: any) => {
+    setEditingEvent(event);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteEvent = (eventId: string) => {
+    if (confirm('Are you sure you want to delete this event?')) {
+      setEvents(events.filter(event => event.id !== eventId));
+    }
   };
 
   return (
@@ -205,17 +226,58 @@ export default function Events() {
                         )}
                       </div>
 
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{event.startTime} - {event.endTime}</span>
-                        </div>
-                        {event.location && (
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            <span>{event.location}</span>
+                            <Clock className="w-4 h-4" />
+                            <span>{event.startTime} - {event.endTime}</span>
                           </div>
-                        )}
+                          {event.location && (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="w-4 h-4" />
+                              <span>{event.location}</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleComplete(event.id)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <div className={`
+                              w-4 h-4 border-2 rounded flex items-center justify-center
+                              ${event.completed 
+                                ? 'bg-primary border-primary text-primary-foreground' 
+                                : 'border-silver hover:border-primary'
+                              }
+                            `}>
+                              {event.completed && <span className="text-xs">✓</span>}
+                            </div>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditEvent(event)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteEvent(event.id)}
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -230,9 +292,14 @@ export default function Events() {
       
       <EventFormModal 
         isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)} 
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditingEvent(null);
+          setPreselectedDate(undefined);
+        }} 
         onSubmit={handleEventSubmit}
         preselectedDate={preselectedDate}
+        initialData={editingEvent}
       />
     </div>
   );

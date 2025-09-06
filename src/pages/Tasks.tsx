@@ -11,9 +11,8 @@ export default function Tasks() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Mock data
-  const tasks = [
+  const [editingTask, setEditingTask] = useState<any>(null);
+  const [tasks, setTasks] = useState([
     {
       id: '1',
       title: 'Complete project proposal',
@@ -41,7 +40,8 @@ export default function Tasks() {
       completed: true,
       createdAt: '2024-01-09'
     },
-  ];
+  ]);
+
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,8 +74,30 @@ export default function Tasks() {
   };
 
   const handleTaskSubmit = (task: any) => {
-    console.log('Created task:', task);
+    if (editingTask) {
+      setTasks(tasks.map(t => t.id === editingTask.id ? { ...task, id: editingTask.id } : t));
+      setEditingTask(null);
+    } else {
+      setTasks([...tasks, { ...task, id: Date.now().toString() }]);
+    }
     setIsFormOpen(false);
+  };
+
+  const handleToggleComplete = (taskId: string) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId ? { ...task, completed: !task.completed } : task
+    ));
+  };
+
+  const handleEditTask = (task: any) => {
+    setEditingTask(task);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    if (confirm('Are you sure you want to delete this task?')) {
+      setTasks(tasks.filter(task => task.id !== taskId));
+    }
   };
 
   return (
@@ -142,9 +164,12 @@ export default function Tasks() {
             >
               <div className="flex items-start gap-4">
                 {/* Checkbox */}
-                <button className="mt-1">
+                <button 
+                  className="mt-1" 
+                  onClick={() => handleToggleComplete(task.id)}
+                >
                   <div className={`
-                    w-5 h-5 border-2 rounded flex items-center justify-center
+                    w-5 h-5 border-2 rounded flex items-center justify-center transition-colors
                     ${task.completed 
                       ? 'bg-primary border-primary text-primary-foreground' 
                       : 'border-silver hover:border-primary'
@@ -174,14 +199,39 @@ export default function Tasks() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      <span>Due: {task.dueDate}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>Due: {task.dueDate}</span>
+                        </div>
+                        <span>•</span>
+                        <span>Created: {task.createdAt}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditTask(task)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteTask(task.id)}
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </Button>
+                      </div>
                     </div>
-                    <span>•</span>
-                    <span>Created: {task.createdAt}</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -193,8 +243,12 @@ export default function Tasks() {
       
       <TaskFormModal 
         isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)} 
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditingTask(null);
+        }} 
         onSubmit={handleTaskSubmit}
+        initialData={editingTask}
       />
     </div>
   );

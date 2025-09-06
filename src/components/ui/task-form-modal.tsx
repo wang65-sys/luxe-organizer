@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './dialog';
 import { Button } from './button';
 import { Input } from './input';
@@ -12,13 +12,29 @@ interface TaskFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (task: any) => void;
+  initialData?: any;
 }
 
-export default function TaskFormModal({ isOpen, onClose, onSubmit }: TaskFormModalProps) {
+export default function TaskFormModal({ isOpen, onClose, onSubmit, initialData }: TaskFormModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState<Date>();
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || '');
+      setDescription(initialData.description || '');
+      setDueDate(initialData.dueDate ? new Date(initialData.dueDate) : undefined);
+      setPriority(initialData.priority || 'medium');
+    } else {
+      setTitle('');
+      setDescription('');
+      setDueDate(undefined);
+      setPriority('medium');
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +61,7 @@ export default function TaskFormModal({ isOpen, onClose, onSubmit }: TaskFormMod
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
+          <DialogTitle>{initialData ? 'Edit Task' : 'Create New Task'}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
@@ -115,7 +131,7 @@ export default function TaskFormModal({ isOpen, onClose, onSubmit }: TaskFormMod
               Cancel
             </Button>
             <Button type="submit" className="flex-1">
-              Create Task
+              {initialData ? 'Update Task' : 'Create Task'}
             </Button>
           </div>
         </form>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './dialog';
 import { Button } from './button';
 import { Input } from './input';
@@ -12,9 +12,10 @@ interface GoalFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (goal: any) => void;
+  initialData?: any;
 }
 
-export default function GoalFormModal({ isOpen, onClose, onSubmit }: GoalFormModalProps) {
+export default function GoalFormModal({ isOpen, onClose, onSubmit, initialData }: GoalFormModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState<Date>(new Date());
@@ -24,6 +25,31 @@ export default function GoalFormModal({ isOpen, onClose, onSubmit }: GoalFormMod
     { id: '2', title: 'Section 2', completed: false },
     { id: '3', title: 'Section 3', completed: false },
   ]);
+
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || '');
+      setDescription(initialData.description || '');
+      setStartDate(initialData.startDate ? new Date(initialData.startDate) : new Date());
+      setEndDate(initialData.endDate ? new Date(initialData.endDate) : undefined);
+      setSections(initialData.sections || [
+        { id: '1', title: 'Section 1', completed: false },
+        { id: '2', title: 'Section 2', completed: false },
+        { id: '3', title: 'Section 3', completed: false },
+      ]);
+    } else {
+      setTitle('');
+      setDescription('');
+      setStartDate(new Date());
+      setEndDate(undefined);
+      setSections([
+        { id: '1', title: 'Section 1', completed: false },
+        { id: '2', title: 'Section 2', completed: false },
+        { id: '3', title: 'Section 3', completed: false },
+      ]);
+    }
+  }, [initialData]);
 
   const addSection = () => {
     const newId = (sections.length + 1).toString();
@@ -70,7 +96,7 @@ export default function GoalFormModal({ isOpen, onClose, onSubmit }: GoalFormMod
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Goal</DialogTitle>
+          <DialogTitle>{initialData ? 'Edit Goal' : 'Create New Goal'}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
@@ -185,7 +211,7 @@ export default function GoalFormModal({ isOpen, onClose, onSubmit }: GoalFormMod
               Cancel
             </Button>
             <Button type="submit" className="flex-1">
-              Create Goal
+              {initialData ? 'Update Goal' : 'Create Goal'}
             </Button>
           </div>
         </form>

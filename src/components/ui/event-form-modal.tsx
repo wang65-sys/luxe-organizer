@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './dialog';
 import { Button } from './button';
 import { Input } from './input';
@@ -13,11 +13,31 @@ interface EventFormModalProps {
   onClose: () => void;
   onSubmit: (event: any) => void;
   preselectedDate?: Date;
+  initialData?: any;
 }
 
-export default function EventFormModal({ isOpen, onClose, onSubmit, preselectedDate }: EventFormModalProps) {
+export default function EventFormModal({ isOpen, onClose, onSubmit, preselectedDate, initialData }: EventFormModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || '');
+      setDescription(initialData.description || '');
+      setDate(initialData.date ? new Date(initialData.date) : new Date());
+      setStartTime(initialData.startTime || '');
+      setEndTime(initialData.endTime || '');
+      setLocation(initialData.location || '');
+    } else {
+      setTitle('');
+      setDescription('');
+      setDate(preselectedDate || new Date());
+      setStartTime('');
+      setEndTime('');
+      setLocation('');
+    }
+  }, [initialData, preselectedDate]);
   const [date, setDate] = useState<Date>(preselectedDate || new Date());
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
@@ -51,7 +71,7 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, preselectedD
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create New Event</DialogTitle>
+          <DialogTitle>{initialData ? 'Edit Event' : 'Create New Event'}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
@@ -133,7 +153,7 @@ export default function EventFormModal({ isOpen, onClose, onSubmit, preselectedD
               Cancel
             </Button>
             <Button type="submit" className="flex-1">
-              Create Event
+              {initialData ? 'Update Event' : 'Create Event'}
             </Button>
           </div>
         </form>

@@ -10,9 +10,8 @@ export default function Goals() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Mock data
-  const goals = [
+  const [editingGoal, setEditingGoal] = useState<any>(null);
+  const [goals, setGoals] = useState([
     {
       id: '1',
       title: 'Learn React Advanced Patterns',
@@ -40,8 +39,8 @@ export default function Goals() {
         { id: '4', title: 'Week 4: Peak Performance', completed: false },
       ],
       completed: false
-    },
-  ];
+    }
+  ]);
 
   const filteredGoals = goals.filter(goal =>
     goal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,8 +65,50 @@ export default function Goals() {
   };
 
   const handleGoalSubmit = (goal: any) => {
-    console.log('Created goal:', goal);
+    if (editingGoal) {
+      setGoals(goals.map(g => g.id === editingGoal.id ? { ...goal, id: editingGoal.id } : g));
+      setEditingGoal(null);
+    } else {
+      setGoals([...goals, { ...goal, id: Date.now().toString() }]);
+    }
     setIsFormOpen(false);
+  };
+
+  const handleEditGoal = (goal: any) => {
+    setEditingGoal(goal);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteGoal = (goalId: string) => {
+    if (confirm('Are you sure you want to delete this goal?')) {
+      setGoals(goals.filter(goal => goal.id !== goalId));
+    }
+  };
+
+  const handleToggleSection = (goalId: string, sectionId: string) => {
+    setGoals(goals.map(goal => 
+      goal.id === goalId 
+        ? {
+            ...goal,
+            sections: goal.sections.map(section =>
+              section.id === sectionId 
+                ? { ...section, completed: !section.completed }
+                : section
+            )
+          }
+        : goal
+    ));
+    
+    // Check if all sections completed
+    const updatedGoal = goals.find(g => g.id === goalId);
+    if (updatedGoal) {
+      const allCompleted = updatedGoal.sections.every(s => 
+        s.id === sectionId ? !s.completed : s.completed
+      );
+      if (allCompleted) {
+        setTimeout(() => alert('🎉 Mission Complete! Goal achieved!'), 100);
+      }
+    }
   };
 
   return (
@@ -197,18 +238,19 @@ export default function Goals() {
                     <div 
                       key={section.id}
                       className={`
-                        flex items-center gap-2 p-2 rounded-lg border transition-colors
+                        flex items-center gap-2 p-2 rounded-lg border transition-colors cursor-pointer
                         ${section.completed 
                           ? 'bg-success/10 border-success/20 text-success' 
                           : 'bg-secondary border-card-border hover:border-primary/20'
                         }
                       `}
+                      onClick={() => handleToggleSection(goal.id, section.id)}
                     >
                       <div className={`
-                        w-4 h-4 border-2 rounded flex items-center justify-center text-xs
+                        w-4 h-4 border-2 rounded flex items-center justify-center text-xs transition-colors
                         ${section.completed 
                           ? 'bg-success border-success text-success-foreground' 
-                          : 'border-silver'
+                          : 'border-silver hover:border-primary'
                         }
                       `}>
                         {section.completed && '✓'}
@@ -221,10 +263,23 @@ export default function Goals() {
                 </div>
               </div>
 
-              {/* Action Button */}
-              <div className="mt-4 pt-4 border-t border-card-border">
-                <Button variant="outline" size="sm" className="w-full">
-                  Update Progress
+              {/* Action Buttons */}
+              <div className="mt-4 pt-4 border-t border-card-border flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => handleEditGoal(goal)}
+                >
+                  Edit Goal
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleDeleteGoal(goal.id)}
+                  className="text-destructive hover:text-destructive"
+                >
+                  Delete
                 </Button>
               </div>
             </div>
@@ -236,8 +291,12 @@ export default function Goals() {
       
       <GoalFormModal 
         isOpen={isFormOpen} 
-        onClose={() => setIsFormOpen(false)} 
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditingGoal(null);
+        }}
         onSubmit={handleGoalSubmit}
+        initialData={editingGoal}
       />
     </div>
   );
